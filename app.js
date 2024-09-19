@@ -112,10 +112,7 @@ const checkForNewArticles = async (job) => {
       // Gửi thông báo tới điện thoại (có thể dùng push notification, email, hoặc webhook)
       sendNotification(
         `Có ${newArticles.length} bài viết mới:`,
-        newArticles
-          .map((art) => art.title)
-          .slice(0, 2)
-          .join("; ")
+        newArticles.map((art) => art.title).join("; ")
       );
 
       // Cập nhật lại danh sách bài viết
