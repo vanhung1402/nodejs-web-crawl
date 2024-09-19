@@ -6,12 +6,12 @@ const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
 // Đường dẫn tới file lưu trữ danh sách bài viết
-const storagePath = path.join(__dirname, "articles.json");
+const storagePath = "./articles.json";
 
 // Đọc danh sách bài viết đã lưu trữ
 const readStoredArticles = () => {
