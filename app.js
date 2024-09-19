@@ -13,16 +13,19 @@ app.use(express.json());
 const sendNoti = (content) => {
   const pushTitle = express.urlencoded(content.pushTitle);
   const pushText = express.urlencoded(content.pushText);
-
-  axios({
-    method: "get", // Hoặc 'get' tùy vào phương thức bạn sử dụng
+  let config = {
+    method: "get",
+    maxBodyLength: Infinity,
     url: `https://www.notifymydevice.com/push?ApiKey=UPDHYSG650SL7BHC2ZU2JBEY1&PushTitle=${pushTitle}&PushText=${pushText}`,
-  })
+  };
+
+  axios
+    .request(config)
     .then((response) => {
-      console.log("Send noti success: ", response.data);
+      console.log(JSON.stringify(response.data));
     })
     .catch((error) => {
-      console.error("Send noti error: ", error);
+      console.log(error);
     });
 };
 
