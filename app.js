@@ -10,6 +10,23 @@ const port = 3000;
 
 app.use(express.json());
 
+// Đường dẫn tới file lưu trữ danh sách bài viết
+const storagePath = path.join(__dirname, "articles.json");
+
+// Đọc danh sách bài viết đã lưu trữ
+const readStoredArticles = () => {
+  if (fs.existsSync(storagePath)) {
+    const rawData = fs.readFileSync(storagePath);
+    return JSON.parse(rawData).articles || [];
+  }
+  return [];
+};
+
+// Ghi danh sách bài viết mới vào file lưu trữ
+const storeArticles = (articles) => {
+  fs.writeFileSync(storagePath, JSON.stringify({ articles }, null, 2));
+};
+
 // Đường dẫn tới file JSON để lưu danh sách các cron job
 const jobsFilePath = "./jobs.json";
 
@@ -44,7 +61,6 @@ const checkForNewArticles = async (job) => {
       },
     });
     const $ = cheerio.load(data);
-    console.log("$: ", $);
 
     // Lấy danh sách bài viết từ query selector
     const articles = $(job.querySelector)
@@ -54,9 +70,29 @@ const checkForNewArticles = async (job) => {
       }))
       .get();
 
-    console.log(
-      `Kiểm tra job ${job.id}: tìm thấy ${articles.length} bài viết.`
+    // Đọc danh sách bài viết đã lưu
+    const storedArticles = readStoredArticles();
+
+    // So sánh và tìm bài viết mới
+    const newArticles = currentArticles.filter(
+      (currentArticle) =>
+        !storedArticles.some(
+          (storedArticle) => storedArticle.link === currentArticle.link
+        )
     );
+
+    // Nếu có bài viết mới
+    if (newArticles.length > 0) {
+      console.log(`Có ${newArticles.length} bài viết mới:`);
+      newArticles.forEach((article) => console.log(article.title));
+
+      // Gửi thông báo tới điện thoại (có thể dùng push notification, email, hoặc webhook)
+
+      // Cập nhật lại danh sách bài viết
+      storeArticles(currentArticles);
+    } else {
+      console.log("Không có bài viết mới.");
+    }
     // Lưu logic kiểm tra và lưu trữ tại đây nếu cần
   } catch (error) {
     console.error(`Có lỗi xảy ra khi kiểm tra job ${job.id}:`, error);
