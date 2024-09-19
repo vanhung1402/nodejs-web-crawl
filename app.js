@@ -13,26 +13,10 @@ app.use(express.json());
 const sendNoti = (content) => {
   const pushTitle = express.urlencoded(content.pushTitle);
   const pushText = express.urlencoded(content.pushText);
+
   axios({
-    method: "post", // Hoặc 'get' tùy vào phương thức bạn sử dụng
-    url: "https://www.notifymydevice.com/myapplications", // Đường dẫn của bạn
-    headers: {
-      accept: "*/*",
-      "accept-language":
-        "vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5",
-      "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-      "sec-ch-ua":
-        '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": '"Windows"',
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "x-requested-with": "XMLHttpRequest",
-      Referer: "https://www.notifymydevice.com/myapplications",
-      "Referrer-Policy": "strict-origin-when-cross-origin",
-    },
-    data: `ApiKey=UPDHYSG650SL7BHC2ZU2JBEY1&PushTitle=${pushTitle}&PushText=${pushText}`,
+    method: "get", // Hoặc 'get' tùy vào phương thức bạn sử dụng
+    url: `https://www.notifymydevice.com/push?ApiKey=UPDHYSG650SL7BHC2ZU2JBEY1&PushTitle=${pushTitle}&PushText=${pushText}`,
   })
     .then((response) => {
       console.log("Send noti success: ", response.data);
@@ -131,6 +115,10 @@ const checkForNewArticles = async (job) => {
     }
   } catch (error) {
     console.error(`Có lỗi xảy ra khi kiểm tra job ${job.id}:`, error);
+    sendNoti({
+      pushTitle: "Có lỗi xảy ra",
+      pushText: `Có lỗi xảy ra khi kiểm tra job ${job.id}:`,
+    });
   }
 };
 
