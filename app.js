@@ -8,26 +8,30 @@ const { v4: uuidv4 } = require("uuid");
 const app = express();
 const port = process.env.PORT || 3000;
 
+const API_KEY = "UPDHYSG650SL7BHC2ZU2JBEY1";
+
 app.use(express.json());
 
-const sendNoti = (content) => {
-  const pushTitle = express.urlencoded(content.pushTitle);
-  const pushText = express.urlencoded(content.pushText);
-  let config = {
-    method: "get",
-    maxBodyLength: Infinity,
-    url: `https://www.notifymydevice.com/push?ApiKey=UPDHYSG650SL7BHC2ZU2JBEY1&PushTitle=${pushTitle}&PushText=${pushText}`,
+async function sendNotification(title, message) {
+  const url = "https://www.notifymydevice.com/push";
+
+  const payload = {
+    ApiKey: API_KEY, // Replace with your API key
+    PushTitle: title, // The title of the notification
+    PushText: message, // The message body of the notification
   };
 
-  axios
-    .request(config)
-    .then((response) => {
-      console.log(JSON.stringify(response.data));
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
+  try {
+    const response = await axios.post(url, payload);
+    if (response.data.Success) {
+      console.log("Notification sent successfully:", response.data);
+    } else {
+      console.error("Failed to send notification:", response.data);
+    }
+  } catch (error) {
+    console.error("Error sending notification:", error.message);
+  }
+}
 
 // Đường dẫn tới file lưu trữ danh sách bài viết
 const storagePath = "./articles.json";
@@ -106,29 +110,26 @@ const checkForNewArticles = async (job) => {
       newArticles.forEach((article) => console.log(article.title));
 
       // Gửi thông báo tới điện thoại (có thể dùng push notification, email, hoặc webhook)
-      sendNoti({
-        pushTitle: `Có ${newArticles.length} bài viết mới:`,
-        pushText: newArticles
+      sendNotification(
+        `Có ${newArticles.length} bài viết mới:`,
+        newArticles
           .map((art) => art.title)
           .slice(0, 2)
-          .join("; "),
-      });
+          .join("; ")
+      );
 
       // Cập nhật lại danh sách bài viết
       storeArticles(currentArticles);
     } else {
       console.log("Không có bài viết mới.");
-      sendNoti({
-        pushTitle: "Thông báo",
-        pushText: "Không có bài viết mới.",
-      });
+      sendNotification("Thông báo", "Không có bài viết mới.");
     }
   } catch (error) {
     console.error(`Có lỗi xảy ra khi kiểm tra job ${job.id}:`, error);
-    sendNoti({
-      pushTitle: "Có lỗi xảy ra",
-      pushText: `Có lỗi xảy ra khi kiểm tra job ${job.id}:`,
-    });
+    sendNotification(
+      "Có lỗi xảy ra",
+      `Có lỗi xảy ra khi kiểm tra job ${job.id}:`
+    );
   }
 };
 
