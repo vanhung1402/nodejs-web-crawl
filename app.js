@@ -118,6 +118,10 @@ const checkForNewArticles = async (job) => {
       storeArticles(currentArticles);
     } else {
       console.log("Không có bài viết mới.");
+      sendNoti({
+        pushTitle: "Thông báo",
+        pushText: "Không có bài viết mới.",
+      });
     }
   } catch (error) {
     console.error(`Có lỗi xảy ra khi kiểm tra job ${job.id}:`, error);
